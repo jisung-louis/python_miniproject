@@ -134,7 +134,7 @@ df_graduates2022.to_csv('./data/df_graduates2022.csv', index=False, encoding='ut
 df_graduates2023.to_csv('./data/df_graduates2023.csv', index=False, encoding='utf-8')
 df_graduates2024.to_csv('./data/df_graduates2024.csv', index=False, encoding='utf-8')
 
-target_scales = ['5규모(300인이상)', '2~299인이하']
+target_scales = ['5규모(300인이상)', '중소규모(5~299인)']
 # 2. 직무별 채용수요만 따로 저장
 job_demand2022 = (
     df_hire_by_job2022[ (df_hire_by_job2022['시도별(17개)'] == '전국') & (df_hire_by_job2022['규모별'].isin(target_scales))]
