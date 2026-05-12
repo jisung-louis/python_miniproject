@@ -162,28 +162,53 @@ df_graduates2024.to_csv('./data/df_graduates2024.csv', index=False, encoding='ut
 target_scales = ['5규모(300인이상)', '중소규모(5~299인)']
 # 2. 직무별 채용수요만 따로 저장
 job_demand2022 = (
-    df_hire_by_job2022[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
+    df_hire_by_job2022[ 
+        (df_hire_by_job2022['시도별(17개)'] == '전국') &
+        (df_hire_by_job2022['직종별'] != '전직종')
+          ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
-job_demand2022['조사년도'] = df_hire_by_job2022['시점'].str[:4]
+# 소분류( 직종코드가 세자리 수 )인 직종만 남기기 -> 추후 중복해서 계산하는 문제 방지!
+job_demand2022 = job_demand2022[job_demand2022['직종'].str.split().str[0].str.len() == 3]
+job_demand2022[['직업코드', '직업명']] = job_demand2022['직종'].str.extract(r'^(\d{3})\s+(.+)$')
+job_demand2022['조사년도'] = '2022'
+job_demand2022.info()
+
+job_demand2022 = job_demand2022[['직업코드', '직업명', '조사년도', '총 구인인원']]
 
 job_demand2023 = (
-    df_hire_by_job2023[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
+    df_hire_by_job2023[ 
+        (df_hire_by_job2022['시도별(17개)'] == '전국') &
+        (df_hire_by_job2022['직종별'] != '전직종')
+                        ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
 job_demand2023['조사년도'] = df_hire_by_job2023['시점'].str[:4]
+# 소분류( 직종코드가 세자리 수 )인 직종만 남기기 -> 추후 중복해서 계산하는 문제 방지!
+job_demand2023 = job_demand2023[job_demand2023['직종'].str.split().str[0].str.len() == 3]
+job_demand2023[['직업코드', '직업명']] = job_demand2023['직종'].str.extract(r'^(\d{3})\s+(.+)$')
+job_demand2023 = job_demand2023[['직업코드', '직업명', '조사년도', '총 구인인원']]
 
 job_demand2024 = (
-    df_hire_by_job2024[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
+    df_hire_by_job2024[ 
+        (df_hire_by_job2022['시도별(17개)'] == '전국') &
+        (df_hire_by_job2022['직종별'] != '전직종')
+          ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
 job_demand2024['조사년도'] = df_hire_by_job2024['시점'].str[:4]
+# 소분류( 직종코드가 세자리 수 )인 직종만 남기기 -> 추후 중복해서 계산하는 문제 방지!
+job_demand2024 = job_demand2024[job_demand2024['직종'].str.split().str[0].str.len() == 3]
+job_demand2024[['직업코드', '직업명']] = job_demand2024['직종'].str.extract(r'^(\d{3})\s+(.+)$')
+job_demand2024 = job_demand2024[['직업코드', '직업명', '조사년도', '총 구인인원']]
+
+job_demand2022.info()
 
 job_demand2022.to_csv('./data/job_demand2022.csv', index=False, encoding='utf-8')
 job_demand2023.to_csv('./data/job_demand2023.csv', index=False, encoding='utf-8')
