@@ -38,7 +38,9 @@ grouped = data.groupby('중계열').agg(
 
 # 평균값 계산
 x_mean = grouped['취업률'].mean()  # 전체 평균 취업률
+print(x_mean)
 y_mean = grouped['유지4차'].mean() # 전체 평균 4차 유지취업률
+print(y_mean)
 
 plt.figure(figsize=(10, 7))
 
@@ -56,6 +58,7 @@ plt.scatter(target['취업률'], target['유지4차'], color='red', s=120)
 # 4. 빨간 점에 이름 표시
 for _, row in target.iterrows():
     plt.text(row['취업률']+0.2, row['유지4차'], row['중계열'], fontsize=9)
+    print(row['중계열'], row['취업률'], row['유지4차'])
 
 plt.xlabel('취업률 (%)')
 plt.ylabel('4차 유지취업률 (%)')
@@ -77,6 +80,7 @@ grouped2['하락폭'] = grouped2['유지1차'] - grouped2['유지4차']
 
 plt.figure(figsize=(10, 8))
 sorted_data = grouped2.sort_values('하락폭', ascending=True)
+print(grouped2.sort_values('하락폭', ascending=False)[['중계열','유지1차','유지4차','하락폭']])
 plt.barh(sorted_data['중계열'], sorted_data['하락폭'])
 plt.xlabel('하락 폭 (1차 - 4차) %p')
 plt.title('중계열별 유지취업률 하락 폭')
