@@ -2,13 +2,13 @@ import pandas as pd
 # 1. 학교전공별취업진학통계
 # 조사기준일, 중계열, 졸업자_계, 졸업자_남, 졸업자_여, 취업률_계, 취업률_남, 취업률_여 만 뽑아옴
 df_employment2022 = pd.read_excel('./data/1학교전공별취업진학통계2022.xlsx', skiprows=13
-                                #   ,usecols=['조사기준일', '중계열', '졸업자_계', '졸업자_남', '졸업자_여', '취업률_계', '취업률_남', '취업률_여']
+                                  ,usecols=['조사기준일', '중계열', '졸업자_계', '취업자_합계_계']
                                   )
 df_employment2023 = pd.read_excel('./data/1학교전공별취업진학통계2023.xlsx', skiprows=14 
-                                #   ,usecols=['조사기준일', '중계열', '졸업자_계', '졸업자_남', '졸업자_여', '취업률_계', '취업률_남', '취업률_여']
+                                  ,usecols=['조사기준일', '중계열', '졸업자_계', '취업자_합계_계']
                                   )
 df_employment2024 = pd.read_excel('./data/1학교전공별취업진학통계2024.xlsx', skiprows=14
-                                #   ,usecols=['조사기준일', '중계열', '졸업자_계', '졸업자_남', '졸업자_여', '취업률_계', '취업률_남', '취업률_여']
+                                  ,usecols=['조사기준일', '중계열', '졸업자_계', '취업자_합계_계']
                                   )
 print("-2022년 한교전공별취업진학통계-")
 print( df_employment2022.head() )
@@ -109,26 +109,51 @@ job_list = [] # 직종 리스트
 # 1.전공 졸업자 수만 따로 저장
 df_graduates2022 =(
     df_employment2022
-    .groupby('중계열')['졸업자_계']
-    .sum().reset_index()
-    .rename(columns={'중계열' : '전공', '졸업자_계' : '총 졸업자 수' })
+    .groupby('중계열')[['졸업자_계', '취업자_합계_계' ]]
+    .sum()
+    .reset_index()
+    .rename(columns={
+        '중계열' : '전공',
+        '졸업자_계' : '총 졸업자 수',
+        '취업자_합계_계' : '총 취업자 수' 
+        })
 )
+# 취업률 파생속성 만들기
+df_graduates2022['취업률'] = ( df_graduates2022['총 취업자 수'] / df_graduates2022['총 졸업자 수'] * 100 ).round(2)
+# 조사년도 넣기
+df_graduates2022['조사년도'] = df_employment2022['조사기준일'].str[:4]
 
 df_graduates2023 =(
     df_employment2023
-    .groupby('중계열')['졸업자_계']
-    .sum().reset_index()
-    .rename(columns={'중계열' : '전공', '졸업자_계' : '총 졸업자 수'
-     })
+    .groupby('중계열')[['졸업자_계', '취업자_합계_계' ]]
+    .sum()
+    .reset_index()
+    .rename(columns={
+        '중계열' : '전공',
+        '졸업자_계' : '총 졸업자 수',
+        '취업자_합계_계' : '총 취업자 수' 
+        })
 )
+# 취업률 파생속성 만들기
+df_graduates2023['취업률'] = ( df_graduates2023['총 취업자 수'] / df_graduates2023['총 졸업자 수'] * 100 ).round(2)
+# 조사년도 넣기
+df_graduates2023['조사년도'] = df_employment2023['조사기준일'].str[:4]
 
 df_graduates2024 =(
     df_employment2024
-    .groupby('중계열')['졸업자_계']
-    .sum().reset_index()
-    .rename(columns={'중계열' : '전공', '졸업자_계' : '총 졸업자 수'
-     })
+    .groupby('중계열')[['졸업자_계', '취업자_합계_계' ]]
+    .sum()
+    .reset_index()
+    .rename(columns={
+        '중계열' : '전공',
+        '졸업자_계' : '총 졸업자 수',
+        '취업자_합계_계' : '총 취업자 수' 
+        })
 )
+# 취업률 파생속성 만들기
+df_graduates2024['취업률'] = ( df_graduates2024['총 취업자 수'] / df_graduates2024['총 졸업자 수'] * 100 ).round(2)
+# 조사년도 넣기
+df_graduates2024['조사년도'] = df_employment2024['조사기준일'].str[:4]
 
 df_graduates2022.to_csv('./data/df_graduates2022.csv', index=False, encoding='utf-8')
 df_graduates2023.to_csv('./data/df_graduates2023.csv', index=False, encoding='utf-8')
@@ -137,25 +162,28 @@ df_graduates2024.to_csv('./data/df_graduates2024.csv', index=False, encoding='ut
 target_scales = ['5규모(300인이상)', '중소규모(5~299인)']
 # 2. 직무별 채용수요만 따로 저장
 job_demand2022 = (
-    df_hire_by_job2022[ (df_hire_by_job2022['시도별(17개)'] == '전국') & (df_hire_by_job2022['규모별'].isin(target_scales))]
+    df_hire_by_job2022[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
+job_demand2022['조사년도'] = df_hire_by_job2022['시점'].str[:4]
 
 job_demand2023 = (
-    df_hire_by_job2023[ (df_hire_by_job2022['시도별(17개)'] == '전국') & (df_hire_by_job2022['규모별'].isin(target_scales))]
+    df_hire_by_job2023[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
+job_demand2023['조사년도'] = df_hire_by_job2023['시점'].str[:4]
 
 job_demand2024 = (
-    df_hire_by_job2024[ (df_hire_by_job2022['시도별(17개)'] == '전국') & (df_hire_by_job2022['규모별'].isin(target_scales))]
+    df_hire_by_job2024[ df_hire_by_job2022['시도별(17개)'] == '전국' ]
     .groupby('직종별')['구인인원[명]']
     .sum().reset_index()
     .rename(columns={'직종별' : '직종', '구인인원[명]' : '총 구인인원'})
 )
+job_demand2024['조사년도'] = df_hire_by_job2024['시점'].str[:4]
 
 job_demand2022.to_csv('./data/job_demand2022.csv', index=False, encoding='utf-8')
 job_demand2023.to_csv('./data/job_demand2023.csv', index=False, encoding='utf-8')
