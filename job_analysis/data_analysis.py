@@ -185,15 +185,9 @@ df_pivot['2024 변화율(%)'] = ((df_pivot[2024] - df_pivot[2023]) / df_pivot[20
 df_pivot = df_pivot.reset_index()
 
 print( df_pivot.head() )
-print( df_pivot )
+print( df_pivot.isnull().sum() )
 
-lq_mean = (
-    totalDf
-    .groupby('전공')['LQ지수']
-    .mean()
-    .reset_index()
-    .rename(columns={'LQ지수': '평균_LQ지수'})
-)
+lq_mean = df_supply[['전공', 'LQ지수']].rename(columns={'LQ지수': '평균_LQ지수'})
 
 df_pivot = df_pivot.merge(
     lq_mean,
@@ -225,12 +219,9 @@ df_pivot = df_pivot.merge(
     how='left'
 )
 
-print(df_pivot.columns)
-print(df_pivot[['전공', '2023 변화율(%)', '취업률차이_2023', '평균_LQ지수']].head())
+print(df_pivot[['전공', '2023 변화율(%)', '2024 변화율(%)', '취업률차이_2023', '취업률차이_2024', '평균_LQ지수']].head())
 
-# -------------------------------------------------
-# 3개년 비교 그래프용 데이터 정리
-# -------------------------------------------------
+# 그래프
 
 df_plot = df_pivot.dropna(
     subset=[
@@ -241,10 +232,8 @@ df_plot = df_pivot.dropna(
     ]
 ).copy()
 
-# 보기 좋게 2023 변화율 기준 정렬
 df_plot = df_plot.sort_values('2023 변화율(%)', ascending=False).reset_index(drop=True)
 
-# x축 위치
 x = np.arange(len(df_plot['전공']))
 bar_width = 0.35
 
