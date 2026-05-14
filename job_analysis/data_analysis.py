@@ -173,9 +173,10 @@ plt.show()
 # 해석결과: 대부분 채용수요가 높아져도 취업률이 낮아지는 걸로 보아, 
 
 
-
+# 구조 변경 행 '전공', 열 '년도', 채울 값 values '총 구인인원'
 df_pivot = totalDf.pivot(index='전공', columns='년도', values='총 구인인원')
 
+# 파생 속성 추가
 df_pivot['2023-2022 차이'] = df_pivot[2023] - df_pivot[2022]
 df_pivot['2024-2023 차이'] = df_pivot[2024] - df_pivot[2023]
 
@@ -191,12 +192,13 @@ lq_mean = df_supply[['전공', 'LQ지수']].rename(columns={'LQ지수': '평균_
 
 df_pivot = df_pivot.merge(
     lq_mean,
-    on='전공',
-    how='left'
+    on='전공', # 합칠 기준
+    how='left' # 합치는 방식
 )
 
 df_pivot = df_pivot[df_pivot['평균_LQ지수'] <= 2.0].copy()
 
+# 졸업자 데이터 합치기
 graduates_all = pd.concat(
     [df_graduates2022, df_graduates2023, df_graduates2024],
     ignore_index=True
@@ -221,8 +223,7 @@ df_pivot = df_pivot.merge(
 
 print(df_pivot[['전공', '2023 변화율(%)', '2024 변화율(%)', '취업률차이_2023', '취업률차이_2024', '평균_LQ지수']].head())
 
-# 그래프
-
+# 결측치 삭제
 df_plot = df_pivot.dropna(
     subset=[
         '2023 변화율(%)',
@@ -237,15 +238,12 @@ df_plot = df_plot.sort_values('2023 변화율(%)', ascending=False).reset_index(
 x = np.arange(len(df_plot['전공']))
 bar_width = 0.35
 
-# -------------------------------------------------
 # 그래프 그리기
-# -------------------------------------------------
-
 fig, ax1 = plt.subplots(figsize=(18, 9))
 
 plt.title('2022~2024 전공별 채용수요 변화율 vs 취업률 변화량', fontsize=18, pad=20)
 
-# 왼쪽 막대: 2022 -> 2023 채용수요 변화율
+# 왼쪽 하늘색막대: 2022 -> 2023 채용수요 변화율
 ax1.bar(
     x - bar_width / 2,
     df_plot['2023 변화율(%)'],
@@ -255,7 +253,7 @@ ax1.bar(
     label='채용수요 변화율: 2022→2023'
 )
 
-# 오른쪽 막대: 2023 -> 2024 채용수요 변화율
+# 오른쪽 회색막대: 2023 -> 2024 채용수요 변화율
 ax1.bar(
     x + bar_width / 2,
     df_plot['2024 변화율(%)'],
@@ -274,11 +272,7 @@ ax1.set_xticklabels(df_plot['전공'], rotation=45, ha='right')
 
 ax1.grid(axis='y', linestyle='--', alpha=0.3)
 
-
-# -------------------------------------------------
 # 오른쪽 y축: 취업률 변화량 점 그래프
-# -------------------------------------------------
-
 ax2 = ax1.twinx()
 
 # 2022 -> 2023 취업률 변화량 점
@@ -305,11 +299,7 @@ ax2.axhline(0, color='firebrick', linestyle='--', linewidth=1, alpha=0.5)
 ax2.set_ylabel('취업률 변화량 (%p)', fontsize=13, color='firebrick', fontweight='bold')
 ax2.tick_params(axis='y', labelcolor='firebrick')
 
-
-# -------------------------------------------------
 # 범례 통합
-# -------------------------------------------------
-
 lines1, labels1 = ax1.get_legend_handles_labels()
 lines2, labels2 = ax2.get_legend_handles_labels()
 
